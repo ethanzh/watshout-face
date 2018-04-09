@@ -1,48 +1,51 @@
 package com.watshout.face;
 
 import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.TextView;
-
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
+import android.widget.ToggleButton;
 
 public class MainActivity extends AppCompatActivity {
-
-    TextView text;
-    Button button;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        text = (TextView) findViewById(R.id.text);
-        button = (Button) findViewById(R.id.button);
+        TextView text = findViewById(R.id.text);
+        Button button = findViewById(R.id.button);
+
+
+        final Timer t = new Timer();
+
+        t.schedule(new TimerTask() {
+            @Override
+            public void run() {
+
+                new PutData().execute();
+
+            }
+        }, 0, 2000);
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                //makeGetRequest();
-
-                new MyDownloadTask().execute();
 
             }
         });
 
     }
 
-    void makeGetRequest() {
+   /* void makeGetRequest() {
 
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(MainActivity.this);
@@ -65,20 +68,31 @@ public class MainActivity extends AppCompatActivity {
 
         queue.add(stringRequest);
 
-    }
+    } */
 }
 
-class MyDownloadTask extends AsyncTask<Void,Void,Void> {
+class PutData extends AsyncTask<Void,Void,Void> {
     protected void onPreExecute() {
         //display progress dialog.
 
     }
     protected Void doInBackground(Void... params) {
         PostExample example = new PostExample();
-        String json = example.bowlingJson("Jesse", "Jake");
+        String json = example.bowlingJson();
         String response = null;
         try {
-            response = example.post("https://personalsite-backend.firebaseio.com/users.json", json);
+
+            long unixTime = System.currentTimeMillis();
+
+            String time = Long.toString(unixTime);
+
+            String url = "https://personalsite-backend.firebaseio.com/messages/" + time + ".json";
+
+            // url = "https://personalsite-backend.firebaseio.com/messages.json";
+
+            response = example.post(url, json);
+
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -88,7 +102,7 @@ class MyDownloadTask extends AsyncTask<Void,Void,Void> {
     }
 
     protected void onPostExecute(Void result){
-        //
+
     }
 
 }

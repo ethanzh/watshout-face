@@ -10,17 +10,18 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class PostExample {
-    public static final MediaType JSON
+
+class PostExample {
+    private static final MediaType JSON
             = MediaType.parse("application/json; charset=utf-8");
 
-    OkHttpClient client = new OkHttpClient();
+    private OkHttpClient client = new OkHttpClient();
 
     String post(String url, String json) throws IOException {
         RequestBody body = RequestBody.create(JSON, json);
         Request request = new Request.Builder()
                 .url(url)
-                .post(body)
+                .put(body)  // Changing this from put to post changes behavior
                 .build();
 
         try {
@@ -33,14 +34,11 @@ public class PostExample {
 
     }
 
-    String bowlingJson(String player1, String player2) {
-        return "{\"9999\": {\"number\": \"12345\", \"username\":\"ethan\"}}";
+    String bowlingJson() {
+        // return "{\"9999\": {\"number\": \"12345\", \"username\":\"ethan\"}}";
+
+
+        return "{\"" + "test" + "\": \"teeest\"}";
     }
 
-    public static void main(String[] args) throws IOException {
-        PostExample example = new PostExample();
-        String json = example.bowlingJson("Jesse", "Jake");
-        String response = example.post("http://www.roundsapp.com/post", json);
-        System.out.println(response);
-    }
 }
