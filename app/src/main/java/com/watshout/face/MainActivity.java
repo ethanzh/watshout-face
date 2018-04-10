@@ -23,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
 
         TextView text = findViewById(R.id.text);
         Button button = findViewById(R.id.button);
+        Button end = findViewById(R.id.end);
 
 
         final Timer t = new Timer();
@@ -40,6 +41,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
+            }
+        });
+
+        end.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
             }
         });
 
@@ -82,13 +90,9 @@ class PutData extends AsyncTask<Void,Void,Void> {
         String response = null;
         try {
 
-            long unixTime = System.currentTimeMillis();
+            //String url = "https://personalsite-backend.firebaseio.com/coords/" + time + ".json";
 
-            String time = Long.toString(unixTime);
-
-            String url = "https://personalsite-backend.firebaseio.com/messages/" + time + ".json";
-
-            // url = "https://personalsite-backend.firebaseio.com/messages.json";
+            String url = "https://personalsite-backend.firebaseio.com/coords.json";
 
             response = example.post(url, json);
 

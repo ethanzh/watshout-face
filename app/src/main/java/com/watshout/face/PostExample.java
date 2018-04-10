@@ -4,6 +4,8 @@ import android.os.NetworkOnMainThreadException;
 import android.util.Log;
 
 import java.io.IOException;
+import java.util.Random;
+
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -21,7 +23,7 @@ class PostExample {
         RequestBody body = RequestBody.create(JSON, json);
         Request request = new Request.Builder()
                 .url(url)
-                .put(body)  // Changing this from put to post changes behavior
+                .post(body)  // Changing this from put to post changes behavior
                 .build();
 
         try {
@@ -35,10 +37,24 @@ class PostExample {
     }
 
     String bowlingJson() {
-        // return "{\"9999\": {\"number\": \"12345\", \"username\":\"ethan\"}}";
 
+        long unixTime = System.currentTimeMillis();
 
-        return "{\"" + "test" + "\": \"teeest\"}";
+        String time = Long.toString(unixTime);
+
+        // what is our range?
+        int max = 5;
+
+        // create instance of Random class
+        Random randomNum = new Random();
+
+        int _lat = -29 + randomNum.nextInt(max);
+        int _long = 131 + randomNum.nextInt(max);
+
+        // return "{\"" + time + "\": {\"lat\": 120.3, \"long\": 90.4}}";
+
+        return "{\"lat\": " + _lat + ", \"long\": " + _long + "}";
+
     }
 
 }
