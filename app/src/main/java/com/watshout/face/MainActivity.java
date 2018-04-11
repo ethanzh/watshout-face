@@ -16,6 +16,9 @@ import android.widget.ToggleButton;
 
 public class MainActivity extends AppCompatActivity {
 
+    int enabled = 0;
+    boolean everStarted = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -23,35 +26,46 @@ public class MainActivity extends AppCompatActivity {
 
         TextView text = findViewById(R.id.text);
         Button button = findViewById(R.id.button);
-        Button end = findViewById(R.id.end);
-
-
-        final Timer t = new Timer();
-
-        t.schedule(new TimerTask() {
-            @Override
-            public void run() {
-
-                new PutData().execute();
-
-            }
-        }, 0, 2000);
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
+                Log.wtf("ENABLED", Integer.toString(enabled));
+
+                if (enabled == 0){
+
+                    enabled = 1;
+
+                    for(int i = 0; i < 1000; i++){
+                        try {
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+
+                        new PutData().execute();
+                    }
+                } else {
+
+                    Log.wtf("ENABLED", "I'm running");
+                    enabled = 1;
+
+                }
             }
         });
-
-        end.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finish();
-            }
-        });
-
     }
+
+    /* Timer t = new Timer();
+
+    t.schedule(new TimerTask() {
+        @Override
+        public void run() {
+
+            new PutData().execute();
+
+        }
+    }, 0, 500); */
 
    /* void makeGetRequest() {
 

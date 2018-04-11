@@ -43,13 +43,13 @@ class PostExample {
         String time = Long.toString(unixTime);
 
         // what is our range?
-        int max = 5;
+        int max = 100;
 
         // create instance of Random class
         Random randomNum = new Random();
 
-        int _lat = -29 + randomNum.nextInt(max);
-        int _long = 131 + randomNum.nextInt(max);
+        int _lat = -29 + randomNum.nextInt(max) / 10;
+        int _long = 131 + randomNum.nextInt(max) / 7;
 
         // return "{\"" + time + "\": {\"lat\": 120.3, \"long\": 90.4}}";
 
