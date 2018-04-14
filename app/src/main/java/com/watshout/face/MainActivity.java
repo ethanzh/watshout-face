@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import android.annotation.SuppressLint;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,19 +15,37 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.ToggleButton;
+import android.provider.Settings.Secure;
 
 public class MainActivity extends AppCompatActivity {
 
     int enabled = 0;
     boolean everStarted = false;
 
+    private boolean hasGps() {
+        return getPackageManager().hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        if (!hasGps()) {
+            Log.d("GPS", "This hardware doesn't have GPS.");
+            // Fall back to functionality that does not use location or
+            // warn the user that location function is not available.
+        }
+
+        Log.wtf("GPS", Boolean.toString(hasGps()));
+
         TextView text = findViewById(R.id.text);
         Button button = findViewById(R.id.button);
+
+        @SuppressLint("HardwareIds") String android_id =
+                Secure.getString(getApplicationContext().getContentResolver(),Secure.ANDROID_ID);
+
+        Log.wtf("android_id", android_id);
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
