@@ -31,5 +31,7 @@ dependencies {
 
     compile 'com.google.android.gms:play-services-location:12.0.1'
 
+    compile 'com.akhgupta:android-easylocation:1.0.1'
+
 
 }
