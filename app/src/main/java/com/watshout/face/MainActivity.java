@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,6 +18,17 @@ import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 import android.provider.Settings.Secure;
+
+import com.google.android.gms.location.LocationServices;
+
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Bundle;
+import android.app.Activity;
+import android.content.Context;
+import android.util.Log;
+import android.view.Menu;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -31,21 +44,56 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (!hasGps()) {
-            Log.d("GPS", "This hardware doesn't have GPS.");
-            // Fall back to functionality that does not use location or
-            // warn the user that location function is not available.
-        }
-
-        Log.wtf("GPS", Boolean.toString(hasGps()));
-
         TextView text = findViewById(R.id.text);
         Button button = findViewById(R.id.button);
 
         @SuppressLint("HardwareIds") String android_id =
-                Secure.getString(getApplicationContext().getContentResolver(),Secure.ANDROID_ID);
+                Secure.getString(getApplicationContext().getContentResolver(), Secure.ANDROID_ID);
 
         Log.wtf("android_id", android_id);
+
+        // Acquire a reference to the system Location Manager
+        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+
+        // Define a listener that responds to location updates
+        LocationListener locationListener = new LocationListener() {
+            public void onLocationChanged(Location location) {
+                // Called when a new location is found by the network location provider.
+
+                int longitude = (int) location.getLongitude();
+
+                Log.wtf("LOCATION", Integer.toString(longitude));
+
+            }
+
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+                Log.wtf("LOCATION", "status");
+            }
+
+            public void onProviderEnabled(String provider) {
+                Log.wtf("LOCATION", "enabled");
+            }
+
+            public void onProviderDisabled(String provider) {
+                Log.wtf("LOCATION", "disabled");
+            }
+        };
+
+        // Register the listener with the Location Manager to receive location updates
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        assert locationManager != null;
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -76,41 +124,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    /* Timer t = new Timer();
-
-    t.schedule(new TimerTask() {
-        @Override
-        public void run() {
-
-            new PutData().execute();
-
-        }
-    }, 0, 500); */
-
-   /* void makeGetRequest() {
-
-        // Instantiate the RequestQueue.
-        RequestQueue queue = Volley.newRequestQueue(MainActivity.this);
-        String url = "https://personalsite-backend.firebaseio.com/users.json";
-
-        // Request a string response from the provided URL.
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        // Display the first 500 characters of the response string.
-                        text.setText(response);
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                text.setText("That didn't work!");
-            }
-        });
-
-        queue.add(stringRequest);
-
-    } */
 }
 
 class PutData extends AsyncTask<Void,Void,Void> {
