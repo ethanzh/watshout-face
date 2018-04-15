@@ -56,21 +56,6 @@ public class MainActivity extends EasyLocationAppCompatActivity {
 
         requestLocationUpdates(easyLocationRequest);
 
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                for (int i = 0; i < 1000; i++) {
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
-                    new PutData().execute();
-                }
-            }
-        });
     }
 
     @Override
@@ -145,35 +130,3 @@ class PostData extends AsyncTask<String, Void, Void> {
     }
 
 }
-
-class PutData extends AsyncTask<Void, Void, Void> {
-    protected void onPreExecute() {
-        //display progress dialog.
-
-    }
-
-    protected Void doInBackground(Void... params) {
-        PostExample example = new PostExample();
-        String json = example.bowlingJson();
-        String response = null;
-        try {
-
-            String url = "https://personalsite-backend.firebaseio.com/coords.json";
-
-            response = example.post(url, json);
-
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        System.out.println(response);
-
-        return null;
-    }
-
-    protected void onPostExecute(Void result) {
-
-    }
-
-}
-
