@@ -45,13 +45,13 @@ public class MainActivity extends EasyLocationAppCompatActivity {
 
         @SuppressLint("RestrictedApi")
         LocationRequest locationRequest = new LocationRequest()
-                .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)
-                .setInterval(5000)
-                .setFastestInterval(5000);
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setInterval(2000);
+         //       .setFastestInterval(1000);
 
         EasyLocationRequest easyLocationRequest = new EasyLocationRequestBuilder()
                 .setLocationRequest(locationRequest)
-                .setFallBackToLastLocationTime(3000)
+        //        .setFallBackToLastLocationTime(3000)
                 .build();
 
         requestLocationUpdates(easyLocationRequest);
@@ -76,10 +76,7 @@ public class MainActivity extends EasyLocationAppCompatActivity {
 
         String toPost = "{\"lat\": " + lat + ", \"long\": " + lon + "}";
 
-        Log.wtf("GPS", toPost);
-
         PostData post = new PostData();
-
         post.execute(toPost);
 
     }
