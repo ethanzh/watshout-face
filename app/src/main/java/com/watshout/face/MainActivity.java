@@ -42,7 +42,6 @@ public class MainActivity extends EasyLocationAppCompatActivity {
         TextView text = findViewById(R.id.text);
         Button button = findViewById(R.id.button);
 
-
         @SuppressLint("RestrictedApi")
         LocationRequest locationRequest = new LocationRequest()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
