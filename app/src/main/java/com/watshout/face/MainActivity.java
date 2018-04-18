@@ -10,6 +10,7 @@ import android.provider.Settings.Secure;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -28,9 +29,9 @@ import okhttp3.Response;
 
 public class MainActivity extends EasyLocationAppCompatActivity {
 
-    private static final int REQUEST_READ_PHONE_STATE = 1;
+    private static final int ACCESS_FINE_LOCATION = 1;
 
-    public static final String OBSERVE_GRANT_REVOKE_PERMISSIONS="android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS";
+    private static final int READ_PHONE_STATE = 2;
 
     @SuppressLint("HardwareIds")
     private String getID() {
@@ -43,10 +44,16 @@ public class MainActivity extends EasyLocationAppCompatActivity {
 
 
 
-        int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE);
+        int locationPermissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
 
-        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_PHONE_STATE}, REQUEST_READ_PHONE_STATE);
+        if (locationPermissionCheck != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, ACCESS_FINE_LOCATION);
+        }
+
+        int phoneStatePermissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE);
+
+        if (phoneStatePermissionCheck != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_PHONE_STATE}, READ_PHONE_STATE);
         }
 
 
@@ -76,26 +83,39 @@ public class MainActivity extends EasyLocationAppCompatActivity {
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
         switch (requestCode) {
-            case REQUEST_READ_PHONE_STATE: {
-                // If request is cancelled, the result arrays are empty.
+            case ACCESS_FINE_LOCATION: {
+
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
+                    // Permission enabled
 
                 } else {
 
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
+                    // Permission disabled
+
                 }
                 return;
             }
 
-            // other 'case' lines to check for other
-            // permissions this app might request.
+            case READ_PHONE_STATE: {
+
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // Permission enabled
+
+                } else {
+
+                    // Permission disabled
+
+                }
+                return;
+            }
         }
     }
+
+
 
     @Override
     public void onLocationPermissionGranted() {
@@ -114,6 +134,10 @@ public class MainActivity extends EasyLocationAppCompatActivity {
         double lon = location.getLongitude();
 
         String toPost = "{\"lat\": " + lat + ", \"long\": " + lon + "}";
+
+        double time = location.getTime();
+
+        Log.wtf("GPS", Double.toString(time));
 
         PostData post = new PostData();
         post.execute(toPost);
