@@ -1,11 +1,15 @@
 package com.watshout.face;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.NetworkOnMainThreadException;
 import android.provider.Settings.Secure;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -29,13 +33,29 @@ import okhttp3.Response;
 
 public class MainActivity extends EasyLocationAppCompatActivity {
 
+    private static final int REQUEST_READ_PHONE_STATE = 1;
+
+    public static final String OBSERVE_GRANT_REVOKE_PERMISSIONS="android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS";
+
     @SuppressLint("HardwareIds")
     private String getID() {
         return Secure.getString(getApplicationContext().getContentResolver(), Secure.ANDROID_ID);
     }
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+
+
+        int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE);
+
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_PHONE_STATE}, REQUEST_READ_PHONE_STATE);
+        }
+
+
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -55,6 +75,31 @@ public class MainActivity extends EasyLocationAppCompatActivity {
 
         requestLocationUpdates(easyLocationRequest);
 
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_READ_PHONE_STATE: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+
+                } else {
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request.
+        }
     }
 
     @Override
