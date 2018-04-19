@@ -25,12 +25,14 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class MainActivity extends AppCompatActivity { //EasyLocationAppCompatActivity {
+public class MainActivity extends AppCompatActivity {
 
+    LocationListener locationListener;
+
+    // Identifies fine location permission
     private static final int ACCESS_FINE_LOCATION = 1;
 
-    private static final int READ_PHONE_STATE = 2;
-
+    // For testing purposes. Need to be static to be updated from other class
     public static TextView text;
 
     @SuppressLint("HardwareIds")
@@ -40,50 +42,39 @@ public class MainActivity extends AppCompatActivity { //EasyLocationAppCompatAct
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-        LocationListener locationListener;
-
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
+
         text = findViewById(R.id.text);
         Button button = findViewById(R.id.button);
 
-        final int FINE_LOCATION_PERMISSION = 1;
 
-        // Here, thisActivity is the current activity
         if (ContextCompat.checkSelfPermission(MainActivity.this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
 
             // Permission is not granted
-            // Should we show an explanation?
             if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
                     Manifest.permission.ACCESS_FINE_LOCATION)) {
-
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
+                // Async error
 
             } else {
 
                 // No explanation needed; request the permission
                 ActivityCompat.requestPermissions(MainActivity.this,
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        FINE_LOCATION_PERMISSION);
-
-                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
+                        ACCESS_FINE_LOCATION);
             }
-        } else {
-            // Permission has already been granted
         }
 
+        // Defines a location service
         LocationManager locationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
 
+        // See below LocationListener class
         locationListener = new MyLocationListener();
 
+        // Unsure which minTime and minDistance values work best
         assert locationManager != null;
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 
@@ -106,27 +97,9 @@ public class MainActivity extends AppCompatActivity { //EasyLocationAppCompatAct
                     // Permission disabled
 
                 }
-                return;
-            }
-
-            case READ_PHONE_STATE: {
-
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    // Permission enabled
-
-                } else {
-
-                    // Permission disabled
-
-                }
-                return;
             }
         }
     }
-
-
 }
 
 class PostData extends AsyncTask<String, Void, Void> {
@@ -141,8 +114,10 @@ class PostData extends AsyncTask<String, Void, Void> {
 
     protected Void doInBackground(String... strings) {
 
+        // Gets the json string from the parameters
         String jsonData = strings[0];
 
+        // Builds a request then POSTs to Firebase
         RequestBody body = RequestBody.create(JSON, jsonData);
         Request request = new Request.Builder()
                 .url("https://personalsite-backend.firebaseio.com/coords.json")
@@ -150,7 +125,10 @@ class PostData extends AsyncTask<String, Void, Void> {
                 .build();
 
         try {
+
+            // Should find out what to do with response
             Response response = client.newCall(request).execute();
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -166,27 +144,30 @@ class PostData extends AsyncTask<String, Void, Void> {
 
 class MyLocationListener implements LocationListener {
 
-
+    // Takes location data and turns it into JSON-like string
     private String parseGPSData(Location location) {
         double lat = location.getLatitude();
         double lon = location.getLongitude();
         double time = location.getTime();
 
-        MainActivity.text.setText(lat + ", " + lon);
+        String printMe = lat + ", " + lon;
+
+        MainActivity.text.setText(printMe);
 
         return "{\"lat\": " + lat + ", \"long\": " + lon + ", \"time\": " + time + "}";
     }
 
     public void onLocationChanged(Location location) {
+
+        // Logcat message
         String message = String.format(
                 "New Location \n Longitude: %1$s \n Latitude: %2$s",
                 location.getLongitude(), location.getLatitude()
         );
 
+        // Parse data, then POST
         String data = parseGPSData(location);
-
         PostData post = new PostData();
-
         post.execute(data);
 
         Log.v("GPSDATA", message);
@@ -214,6 +195,5 @@ class MyLocationListener implements LocationListener {
     public void onProviderEnabled(String provider) {
         Log.v("GPSDATA", "Enabled");
     }
-
 
 }
