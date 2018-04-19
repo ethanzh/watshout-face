@@ -4,7 +4,9 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
+import android.location.LocationProvider;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings.Secure;
@@ -12,14 +14,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-
-import com.akhgupta.easylocation.EasyLocationAppCompatActivity;
-import com.akhgupta.easylocation.EasyLocationRequest;
-import com.akhgupta.easylocation.EasyLocationRequestBuilder;
-import com.google.android.gms.location.LocationRequest;
 
 import java.io.IOException;
 
@@ -35,91 +31,65 @@ public class MainActivity extends AppCompatActivity { //EasyLocationAppCompatAct
 
     private static final int READ_PHONE_STATE = 2;
 
+    public static TextView text;
+
     @SuppressLint("HardwareIds")
     private String getID() {
         return Secure.getString(getApplicationContext().getContentResolver(), Secure.ANDROID_ID);
     }
 
-    private String parseGPSData(Location location) {
-        double lat = location.getLatitude();
-        double lon = location.getLongitude();
-        double time = location.getTime();
-
-        String toPost = "{\"lat\": " + lat + ", \"long\": " + lon + ", \"time\": " + time + "}";
-
-        return toPost;
-    }
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
+        LocationListener locationListener;
+
+        super.onCreate(savedInstanceState);
+
+        setContentView(R.layout.activity_main);
+        text = findViewById(R.id.text);
+        Button button = findViewById(R.id.button);
+
+        final int FINE_LOCATION_PERMISSION = 1;
+
+        // Here, thisActivity is the current activity
+        if (ContextCompat.checkSelfPermission(MainActivity.this,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Permission is not granted
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
+                    Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+
+            } else {
+
+                // No explanation needed; request the permission
+                ActivityCompat.requestPermissions(MainActivity.this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        FINE_LOCATION_PERMISSION);
+
+                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+            }
+        } else {
+            // Permission has already been granted
+        }
 
         LocationManager locationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        locationListener = new MyLocationListener();
 
-        String data = parseGPSData(location);
+        assert locationManager != null;
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 
-        Log.wtf("REAL", data);
-
-        PostData post = new PostData();
-        post.execute(data);
-
-
-        /*
-        int locationPermissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
-
-        if (locationPermissionCheck != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, ACCESS_FINE_LOCATION);
-        }
-
-        int phoneStatePermissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE);
-
-        if (phoneStatePermissionCheck != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_PHONE_STATE}, READ_PHONE_STATE);
-        }
-        */
-
-
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        TextView text = findViewById(R.id.text);
-
-
-        text.setText(data);
-
-        /*
-
-        @SuppressLint("RestrictedApi")
-        LocationRequest locationRequest = new LocationRequest()
-                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                .setInterval(2000);
-         //       .setFastestInterval(1000);
-
-        EasyLocationRequest easyLocationRequest = new EasyLocationRequestBuilder()
-                .setLocationRequest(locationRequest)
-        //        .setFallBackToLastLocationTime(3000)
-                .build();
-
-        requestLocationUpdates(easyLocationRequest);
-
-        */
 
     }
 
-    /*
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
@@ -157,46 +127,6 @@ public class MainActivity extends AppCompatActivity { //EasyLocationAppCompatAct
     }
 
 
-
-    @Override
-    public void onLocationPermissionGranted() {
-        Log.wtf("GPS", "Permission Granted");
-    }
-
-    @Override
-    public void onLocationPermissionDenied() {
-        Log.wtf("GPS", "Permission Denied");
-    }
-
-    @Override
-    public void onLocationReceived(Location location) {
-
-        double lat = location.getLatitude();
-        double lon = location.getLongitude();
-
-        String toPost = "{\"lat\": " + lat + ", \"long\": " + lon + "}";
-
-        double time = location.getTime();
-
-        Log.wtf("GPS", Double.toString(time));
-
-        PostData post = new PostData();
-        post.execute(toPost);
-
-    }
-
-    @Override
-    public void onLocationProviderEnabled() {
-        Log.wtf("GPS", "Enabled");
-    }
-
-    @Override
-    public void onLocationProviderDisabled() {
-        Log.wtf("GPS", "Disabled");
-    }
-
-    */
-
 }
 
 class PostData extends AsyncTask<String, Void, Void> {
@@ -231,5 +161,59 @@ class PostData extends AsyncTask<String, Void, Void> {
     protected void onPostExecute(Void result) {
 
     }
+
+}
+
+class MyLocationListener implements LocationListener {
+
+
+    private String parseGPSData(Location location) {
+        double lat = location.getLatitude();
+        double lon = location.getLongitude();
+        double time = location.getTime();
+
+        MainActivity.text.setText(lat + ", " + lon);
+
+        return "{\"lat\": " + lat + ", \"long\": " + lon + ", \"time\": " + time + "}";
+    }
+
+    public void onLocationChanged(Location location) {
+        String message = String.format(
+                "New Location \n Longitude: %1$s \n Latitude: %2$s",
+                location.getLongitude(), location.getLatitude()
+        );
+
+        String data = parseGPSData(location);
+
+        PostData post = new PostData();
+
+        post.execute(data);
+
+        Log.v("GPSDATA", message);
+    }
+
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+                            /* This is called when the GPS status alters */
+        switch (status) {
+            case LocationProvider.OUT_OF_SERVICE:
+                Log.v("GPSDATA", "OUT_OF_SERVICE");
+                break;
+            case LocationProvider.TEMPORARILY_UNAVAILABLE:
+                Log.v("GPSDATA", "TEMPORARILY_UNAVAILABLE");
+                break;
+            case LocationProvider.AVAILABLE:
+                Log.v("GPSDATA", "AVAILABLE");
+                break;
+        }
+    }
+
+    public void onProviderDisabled(String provider) {
+        Log.v("GPSDATA", "Disabled");
+    }
+
+    public void onProviderEnabled(String provider) {
+        Log.v("GPSDATA", "Enabled");
+    }
+
 
 }
