@@ -4,11 +4,13 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings.Secure;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -27,7 +29,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class MainActivity extends EasyLocationAppCompatActivity {
+public class MainActivity extends AppCompatActivity { //EasyLocationAppCompatActivity {
 
     private static final int ACCESS_FINE_LOCATION = 1;
 
@@ -38,12 +40,44 @@ public class MainActivity extends EasyLocationAppCompatActivity {
         return Secure.getString(getApplicationContext().getContentResolver(), Secure.ANDROID_ID);
     }
 
+    private String parseGPSData(Location location) {
+        double lat = location.getLatitude();
+        double lon = location.getLongitude();
+        double time = location.getTime();
+
+        String toPost = "{\"lat\": " + lat + ", \"long\": " + lon + ", \"time\": " + time + "}";
+
+        return toPost;
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
 
+        LocationManager locationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
 
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+        String data = parseGPSData(location);
+
+        Log.wtf("REAL", data);
+
+        PostData post = new PostData();
+        post.execute(data);
+
+
+        /*
         int locationPermissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
 
         if (locationPermissionCheck != PackageManager.PERMISSION_GRANTED) {
@@ -55,7 +89,7 @@ public class MainActivity extends EasyLocationAppCompatActivity {
         if (phoneStatePermissionCheck != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_PHONE_STATE}, READ_PHONE_STATE);
         }
-
+        */
 
 
         super.onCreate(savedInstanceState);
@@ -63,6 +97,8 @@ public class MainActivity extends EasyLocationAppCompatActivity {
 
         TextView text = findViewById(R.id.text);
         Button button = findViewById(R.id.button);
+
+        /*
 
         @SuppressLint("RestrictedApi")
         LocationRequest locationRequest = new LocationRequest()
@@ -77,8 +113,11 @@ public class MainActivity extends EasyLocationAppCompatActivity {
 
         requestLocationUpdates(easyLocationRequest);
 
+        */
+
     }
 
+    /*
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
@@ -153,6 +192,8 @@ public class MainActivity extends EasyLocationAppCompatActivity {
     public void onLocationProviderDisabled() {
         Log.wtf("GPS", "Disabled");
     }
+
+    */
 
 }
 
