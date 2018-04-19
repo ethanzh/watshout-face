@@ -96,7 +96,9 @@ public class MainActivity extends AppCompatActivity { //EasyLocationAppCompatAct
         setContentView(R.layout.activity_main);
 
         TextView text = findViewById(R.id.text);
-        Button button = findViewById(R.id.button);
+
+
+        text.setText(data);
 
         /*
 
